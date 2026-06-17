@@ -1,7 +1,3 @@
 {
-  "rewrites": [
-    { "source": "/campaign-search-agent", "destination": "/Campaign Search Agent.dc.html" },
-    { "source": "/marketing-master-agent", "destination": "/Marketing Master Agent.dc.html" },
-    { "source": "/", "destination": "/index.html" }
-  ]
+  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
 }

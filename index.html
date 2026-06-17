@@ -1,30 +1,661 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Marketing Master Agent</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ETIYA Marketing Cloud</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: "Open Sans", sans-serif; background: #F0F5FB; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
-    .container { text-align: center; padding: 40px; }
-    h1 { font-size: 22px; color: #2B3445; margin-bottom: 8px; }
-    p { color: #505B79; font-size: 14px; margin-bottom: 32px; }
-    .cards { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
-    a.card { display: block; background: #fff; border: 1px solid #EEF2F7; border-radius: 12px; padding: 28px 36px; text-decoration: none; color: #2B3445; font-size: 14px; font-weight: 600; transition: box-shadow .2s; }
-    a.card:hover { box-shadow: 0 4px 16px rgba(0,0,0,.08); }
-    .tag { display: inline-block; background: #F7941D; color: #fff; font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 3px; letter-spacing: .04em; margin-bottom: 12px; }
+    body { font-family: 'Segoe UI', sans-serif; background: #F5F7FA; color: #333; display: flex; flex-direction: column; height: 100vh; }
+
+    /* TOP BAR */
+    .topbar {
+      display: flex; align-items: center; justify-content: space-between;
+      background: #fff; padding: 0 20px; height: 56px;
+      border-bottom: 1px solid #e8e8e8; flex-shrink: 0;
+    }
+    .logo { display: flex; align-items: center; gap: 8px; }
+    .logo-icon { width: 32px; height: 32px; }
+    .logo-text { font-size: 13px; font-weight: 700; color: #FF6B00; line-height: 1.2; }
+    .logo-sub { font-size: 11px; color: #888; font-weight: 400; display: block; }
+    .topbar-right { display: flex; align-items: center; gap: 16px; }
+    .lang-btn { border: 1px solid #ddd; border-radius: 4px; padding: 4px 10px; font-size: 13px; cursor: pointer; background: #fff; display: flex; align-items: center; gap: 4px; }
+    .icon-btn { background: none; border: none; cursor: pointer; position: relative; font-size: 18px; }
+    .badge { position: absolute; top: -4px; right: -4px; background: #4CAF50; color: #fff; border-radius: 50%; width: 16px; height: 16px; font-size: 10px; display: flex; align-items: center; justify-content: center; }
+    .user-info { display: flex; align-items: center; gap: 8px; }
+    .avatar { width: 36px; height: 36px; border-radius: 50%; background: #8B6914; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 14px; font-weight: 600; }
+    .user-name { font-size: 13px; font-weight: 600; }
+    .user-role { font-size: 11px; color: #888; }
+    .hamburger { background: none; border: none; font-size: 20px; cursor: pointer; color: #555; }
+
+    /* LAYOUT */
+    .main-layout { display: flex; flex: 1; overflow: hidden; }
+
+    /* SIDEBAR */
+    .sidebar {
+      width: 180px; background: #fff; border-right: 1px solid #e8e8e8;
+      display: flex; flex-direction: column; overflow-y: auto; flex-shrink: 0;
+    }
+    .sidebar-section { padding: 12px 0 4px 16px; font-size: 10px; font-weight: 700; color: #aaa; letter-spacing: 1px; text-transform: uppercase; }
+    .nav-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 16px; font-size: 13px; color: #555;
+      cursor: pointer; transition: all .15s; border-left: 3px solid transparent;
+    }
+    .nav-item:hover { background: #f0faf0; color: #388E3C; }
+    .nav-item.active { background: #f0faf0; color: #388E3C; border-left-color: #4CAF50; font-weight: 600; }
+    .nav-item .icon { font-size: 16px; width: 20px; text-align: center; }
+    .nav-item.sub { padding-left: 46px; font-size: 12px; }
+    .chevron { margin-left: auto; font-size: 11px; color: #aaa; }
+
+    /* CONTENT */
+    .content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+    .breadcrumb { padding: 12px 24px; font-size: 12px; color: #888; background: #fff; border-bottom: 1px solid #eee; flex-shrink: 0; }
+    .breadcrumb a { color: #388E3C; text-decoration: none; font-weight: 500; }
+
+    /* PAGES */
+    .page { flex: 1; overflow-y: auto; padding: 24px; display: none; }
+    .page.active { display: flex; gap: 20px; }
+
+    /* CAMPAIGN LIST PAGE */
+    .list-page { flex-direction: column !important; }
+    .search-panel { background: #fff; border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 1px 4px rgba(0,0,0,.06); }
+    .search-title { font-size: 16px; font-weight: 600; color: #388E3C; margin-bottom: 16px; }
+    .search-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .form-input { width: 100%; border: 1px solid #ddd; border-radius: 6px; padding: 9px 12px; font-size: 13px; color: #333; outline: none; transition: border .15s; }
+    .form-input:focus { border-color: #4CAF50; }
+    .form-select { width: 100%; border: 1px solid #ddd; border-radius: 6px; padding: 9px 12px; font-size: 13px; color: #555; background: #fff; cursor: pointer; outline: none; }
+
+    .campaign-panel { background: #fff; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,.06); }
+    .panel-header { padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #f0f0f0; }
+    .panel-title { font-size: 16px; font-weight: 600; color: #333; }
+    .btn-add { width: 32px; height: 32px; border-radius: 50%; background: #4CAF50; color: #fff; border: none; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background .15s; }
+    .btn-add:hover { background: #388E3C; }
+
+    table { width: 100%; border-collapse: collapse; }
+    th { padding: 12px 16px; text-align: left; font-size: 12px; color: #888; font-weight: 600; border-bottom: 1px solid #f0f0f0; }
+    th .sort { font-size: 10px; }
+    td { padding: 12px 16px; font-size: 13px; border-bottom: 1px solid #f8f8f8; vertical-align: middle; }
+    tr:hover td { background: #fafff8; }
+    .expand-btn { background: none; border: none; color: #388E3C; cursor: pointer; font-size: 14px; }
+    .campaign-link { color: #388E3C; text-decoration: none; font-weight: 500; }
+    .campaign-link:hover { text-decoration: underline; }
+    .status-badge { display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; }
+    .status-active { background: #E8F5E9; color: #388E3C; }
+    .status-expired { background: #FFF3E0; color: #E65100; }
+    .action-btns { display: flex; gap: 4px; }
+    .action-btn { width: 26px; height: 26px; border-radius: 50%; border: 1.5px solid; background: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 12px; transition: all .15s; }
+    .action-btn.green { border-color: #4CAF50; color: #4CAF50; }
+    .action-btn.green:hover { background: #4CAF50; color: #fff; }
+    .action-btn.red { border-color: #E53935; color: #E53935; }
+    .action-btn.red:hover { background: #E53935; color: #fff; }
+    .action-btn.orange { border-color: #FF6B00; color: #FF6B00; }
+    .pagination { display: flex; align-items: center; justify-content: center; gap: 4px; padding: 16px; }
+    .page-btn { width: 30px; height: 30px; border-radius: 4px; border: 1px solid #ddd; background: #fff; cursor: pointer; font-size: 13px; }
+    .page-btn.active { background: #4CAF50; color: #fff; border-color: #4CAF50; }
+    .page-btn:hover:not(.active) { border-color: #4CAF50; }
+
+    /* CREATE PAGE */
+    .create-left { flex: 1; }
+    .create-right { width: 420px; flex-shrink: 0; }
+    .form-card { background: #fff; border-radius: 8px; padding: 24px; box-shadow: 0 1px 4px rgba(0,0,0,.06); }
+    .form-card h2 { font-size: 16px; font-weight: 600; color: #388E3C; margin-bottom: 20px; }
+    .form-group { margin-bottom: 14px; }
+    .form-label { font-size: 12px; color: #888; margin-bottom: 4px; display: block; font-weight: 500; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .date-wrap { position: relative; }
+    .date-wrap input { padding-right: 36px; }
+    .date-icon { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: #4CAF50; cursor: pointer; }
+    .btn-submit { width: 100%; padding: 11px; background: #4CAF50; color: #fff; border: none; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; margin-top: 8px; transition: background .15s; }
+    .btn-submit:hover { background: #388E3C; }
+
+    /* DIGITAL TWIN AGENT PANEL */
+    .agent-panel { background: #fff; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,.06); overflow: hidden; }
+    .agent-header { padding: 16px 20px; background: #1A237E; color: #fff; display: flex; align-items: center; justify-content: space-between; }
+    .agent-title { font-size: 14px; font-weight: 700; letter-spacing: 0.5px; }
+    .agent-subtitle { font-size: 11px; opacity: 0.75; margin-top: 2px; }
+    .risk-badge { padding: 4px 12px; border-radius: 4px; font-size: 11px; font-weight: 700; letter-spacing: 0.5px; }
+    .risk-high { background: #E53935; }
+    .risk-medium { background: #FF6B00; }
+    .risk-low { background: #43A047; }
+
+    .agent-empty { padding: 48px 24px; text-align: center; color: #bbb; }
+    .agent-empty-icon { font-size: 48px; margin-bottom: 12px; }
+    .agent-empty-text { font-size: 14px; }
+
+    .agent-body { padding: 0; }
+    .metrics-grid { display: grid; grid-template-columns: 1fr 1fr; border-bottom: 1px solid #f0f0f0; }
+    .metric-cell { padding: 14px 20px; border-right: 1px solid #f0f0f0; }
+    .metric-cell:nth-child(2), .metric-cell:nth-child(4) { border-right: none; }
+    .metric-label { font-size: 10px; color: #aaa; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; }
+    .metric-value { font-size: 22px; font-weight: 700; color: #333; margin-top: 4px; }
+    .metric-value.green { color: #388E3C; }
+
+    .charts-row { display: grid; grid-template-columns: 1fr 1fr; padding: 16px 20px; gap: 16px; border-bottom: 1px solid #f0f0f0; }
+    .chart-section h4 { font-size: 11px; font-weight: 700; color: #aaa; letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 12px; }
+
+    /* Donut chart */
+    .donut-wrap { display: flex; align-items: center; gap: 12px; }
+    .donut-canvas { position: relative; width: 80px; height: 80px; flex-shrink: 0; }
+    .donut-legend { display: flex; flex-direction: column; gap: 4px; }
+    .legend-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: #555; }
+    .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+
+    /* Gauge */
+    .gauge-wrap { display: flex; flex-direction: column; align-items: center; }
+    .gauge-canvas { position: relative; width: 110px; height: 60px; }
+    .gauge-value { font-size: 20px; font-weight: 700; color: #E53935; text-align: center; margin-top: 4px; }
+
+    /* Warnings */
+    .warnings-section { padding: 16px 20px; }
+    .warnings-title { font-size: 11px; font-weight: 700; color: #aaa; letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 10px; }
+    .warning-item { display: flex; align-items: flex-start; gap: 8px; padding: 8px 10px; border-radius: 6px; margin-bottom: 6px; font-size: 12px; }
+    .warning-critical { background: #FFEBEE; color: #C62828; }
+    .warning-warning { background: #FFF8E1; color: #E65100; }
+    .warning-ok { background: #E8F5E9; color: #2E7D32; }
+    .warning-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+    .warning-text { line-height: 1.4; }
+    .warning-bold { font-weight: 700; }
+
+    /* Analyzing state */
+    .analyzing { padding: 32px 20px; display: flex; flex-direction: column; align-items: center; color: #888; }
+    .spinner { width: 36px; height: 36px; border: 3px solid #e0e0e0; border-top-color: #4CAF50; border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 12px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .hidden { display: none !important; }
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="tag">ETIYA</div>
-    <h1>Marketing Master Agent</h1>
-    <p>Select a design to preview</p>
-    <div class="cards">
-      <a class="card" href="/Campaign Search Agent.dc.html">Campaign Search Agent</a>
-      <a class="card" href="/Marketing Master Agent.dc.html">Marketing Master Agent</a>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div style="display:flex;align-items:center;gap:12px;">
+    <button class="hamburger">☰</button>
+    <div class="logo">
+      <svg class="logo-icon" viewBox="0 0 32 32"><rect width="32" height="32" rx="4" fill="#FF6B00"/><text x="16" y="22" text-anchor="middle" fill="white" font-size="14" font-weight="800" font-family="Arial">E</text></svg>
+      <div>
+        <div class="logo-text">ETIYA</div>
+        <span class="logo-sub">MARKETING CLOUD</span>
+      </div>
     </div>
   </div>
+  <div class="topbar-right">
+    <div class="lang-btn">EN <span style="font-size:10px">▼</span></div>
+    <button class="icon-btn" style="color:#4CAF50">🔔<span class="badge">0</span></button>
+    <button class="icon-btn" style="color:#888">📋</button>
+    <div class="user-info">
+      <div class="avatar">NR</div>
+      <div>
+        <div class="user-name">Neval Reisoğlu</div>
+        <div class="user-role">Etiya Admin</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN LAYOUT -->
+<div class="main-layout">
+
+  <!-- SIDEBAR -->
+  <nav class="sidebar">
+    <div class="sidebar-section">Favorites</div>
+    <div class="nav-item" onclick="goTo('list')"><span class="icon">🏠</span> Dashboard</div>
+    <div class="nav-item"><span class="icon">📊</span> Operation Analysis <span class="chevron">▼</span></div>
+    <div class="sidebar-section">Pages</div>
+    <div class="nav-item"><span class="icon">🎯</span> Program</div>
+    <div class="nav-item active" id="nav-campaign" onclick="goTo('list')"><span class="icon">📢</span> Campaign</div>
+    <div class="nav-item"><span class="icon">📝</span> Content <span class="chevron">▼</span></div>
+    <div class="nav-item"><span class="icon">👥</span> Segmentation</div>
+    <div class="nav-item"><span class="icon">🗄️</span> Datamart</div>
+    <div class="nav-item"><span class="icon">⚙️</span> Parameters <span class="chevron">▼</span></div>
+    <div class="nav-item"><span class="icon">🗺️</span> Journey Builder</div>
+  </nav>
+
+  <!-- CONTENT -->
+  <div class="content">
+    <div class="breadcrumb" id="breadcrumb">
+      <a href="#" onclick="goTo('list')">DASHBOARD</a> &rsaquo; <a href="#" onclick="goTo('list')">SEARCH CAMPAIGN</a>
+    </div>
+
+    <!-- CAMPAIGN LIST PAGE -->
+    <div class="page list-page active" id="page-list">
+      <div style="display:grid;grid-template-columns:300px 1fr;gap:20px;">
+        <!-- Search Panel -->
+        <div class="search-panel">
+          <div class="search-title">Search</div>
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <input class="form-input" placeholder="Name" />
+            <input class="form-input" placeholder="Campaign ID" />
+            <select class="form-select"><option value="">Category</option><option>Retention</option><option>Acquisition</option></select>
+            <select class="form-select"><option value="">Sub Category</option><option>Bundle</option><option>Discount</option></select>
+            <select class="form-select"><option value="">Campaign Type</option><option>Offer</option><option>Info</option></select>
+            <select class="form-select"><option value="">Campaign Label Name</option></select>
+            <select class="form-select"><option value="">Delivery Status</option><option>Sent</option><option>Pending</option></select>
+            <select class="form-select"><option value="">Campaign Status</option><option>Active</option><option>Expired</option><option>Draft</option></select>
+            <select class="form-select"><option value="">Datamart</option></select>
+            <div class="date-wrap"><input class="form-input" placeholder="Start Date" type="date" /><span class="date-icon">📅</span></div>
+            <div class="date-wrap"><input class="form-input" placeholder="End Date" type="date" /><span class="date-icon">📅</span></div>
+          </div>
+        </div>
+
+        <!-- Campaign List -->
+        <div class="campaign-panel">
+          <div class="panel-header">
+            <div class="panel-title">Campaign List</div>
+            <button class="btn-add" onclick="goTo('create')" title="Create Campaign">+</button>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th></th>
+                <th>Name <span class="sort">↕</span></th>
+                <th>Campaign ID <span class="sort">↕</span></th>
+                <th>Code <span class="sort">↕</span></th>
+                <th>Campaign Type <span class="sort">↕</span></th>
+                <th>Campaign Status <span class="sort">↕</span></th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="campaign-tbody"></tbody>
+          </table>
+          <div class="pagination">
+            <button class="page-btn">«</button>
+            <button class="page-btn">‹</button>
+            <button class="page-btn active">1</button>
+            <button class="page-btn">›</button>
+            <button class="page-btn">»</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CAMPAIGN CREATE PAGE -->
+    <div class="page" id="page-create" style="align-items:flex-start;">
+      <!-- Form -->
+      <div class="create-left">
+        <div class="form-card">
+          <h2>Create Campaign</h2>
+          <div class="form-group">
+            <label class="form-label">Campaign Name *</label>
+            <input class="form-input" placeholder="Enter campaign name" id="f-name" />
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Campaign ID</label>
+              <input class="form-input" value="Auto-generated" disabled style="background:#f8f8f8;color:#aaa;" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Campaign Type *</label>
+              <select class="form-select" style="border-radius:6px;padding:9px 12px;">
+                <option value="">Select type</option>
+                <option>Offer</option>
+                <option>Info</option>
+                <option>Discount</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Category</label>
+              <select class="form-select" style="border-radius:6px;padding:9px 12px;">
+                <option value="">Select category</option>
+                <option>Retention</option>
+                <option>Acquisition</option>
+                <option>Upsell</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Sub Category</label>
+              <select class="form-select" style="border-radius:6px;padding:9px 12px;">
+                <option value="">Select sub category</option>
+                <option>Bundle</option>
+                <option>Discount</option>
+                <option>Loyalty</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Campaign Label Name</label>
+            <select class="form-select" style="border-radius:6px;padding:9px 12px;">
+              <option value="">Select label</option>
+              <option>Summer Campaign</option>
+              <option>Black Friday</option>
+              <option>Year-End</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Delivery Status</label>
+              <select class="form-select" style="border-radius:6px;padding:9px 12px;">
+                <option>Pending</option>
+                <option>Sent</option>
+                <option>Scheduled</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Campaign Status</label>
+              <select class="form-select" style="border-radius:6px;padding:9px 12px;">
+                <option>Active</option>
+                <option>Draft</option>
+                <option>Expired</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Datamart</label>
+            <select class="form-select" style="border-radius:6px;padding:9px 12px;">
+              <option value="">Select datamart</option>
+              <option>Telecom DM</option>
+              <option>Digital DM</option>
+              <option>Churn DM</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">🤖 Target Segment (triggers Digital Twin Analysis)</label>
+            <select class="form-select" style="border-radius:6px;padding:9px 12px;border-color:#4CAF50;" id="segment-select" onchange="onSegmentChange(this.value)">
+              <option value="">— Select a customer segment —</option>
+              <option value="1">Budget-Conscious Streamers</option>
+              <option value="2">High-Value Gamers</option>
+              <option value="3">Family Bundle Subscribers</option>
+              <option value="4">Business Premium</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Start Date</label>
+              <div class="date-wrap">
+                <input class="form-input" type="date" />
+                <span class="date-icon">📅</span>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">End Date</label>
+              <div class="date-wrap">
+                <input class="form-input" type="date" />
+                <span class="date-icon">📅</span>
+              </div>
+            </div>
+          </div>
+          <button class="btn-submit">Save Campaign</button>
+          <button onclick="goTo('list')" style="width:100%;margin-top:8px;padding:11px;background:#fff;color:#888;border:1px solid #ddd;border-radius:6px;font-size:13px;cursor:pointer;">Cancel</button>
+        </div>
+      </div>
+
+      <!-- Digital Twin Agent Panel -->
+      <div class="create-right">
+        <div class="agent-panel" id="agent-panel">
+          <div class="agent-header" id="agent-header">
+            <div>
+              <div class="agent-title">🤖 DIGITAL TWIN AGENT</div>
+              <div class="agent-subtitle" id="agent-subtitle">Select a segment to start analysis</div>
+            </div>
+          </div>
+          <div id="agent-empty" class="agent-empty">
+            <div class="agent-empty-icon">🔍</div>
+            <div class="agent-empty-text">Select a target segment to activate<br>the Digital Twin Agent analysis</div>
+          </div>
+          <div id="agent-analyzing" class="analyzing hidden">
+            <div class="spinner"></div>
+            <div>Analyzing segment data...</div>
+          </div>
+          <div id="agent-result" class="hidden">
+            <div class="agent-body">
+              <div class="metrics-grid">
+                <div class="metric-cell">
+                  <div class="metric-label">Group Share</div>
+                  <div class="metric-value" id="m-share">—</div>
+                </div>
+                <div class="metric-cell">
+                  <div class="metric-label">⌀ Avg Contract</div>
+                  <div class="metric-value" id="m-contract">—</div>
+                </div>
+                <div class="metric-cell">
+                  <div class="metric-label">Expected Purchase</div>
+                  <div class="metric-value green" id="m-purchase">—</div>
+                </div>
+                <div class="metric-cell">
+                  <div class="metric-label">Average Tenure</div>
+                  <div class="metric-value" id="m-tenure">—</div>
+                </div>
+              </div>
+              <div class="charts-row">
+                <div class="chart-section">
+                  <h4>CLV Segments</h4>
+                  <div class="donut-wrap">
+                    <div class="donut-canvas">
+                      <svg viewBox="0 0 80 80" width="80" height="80" id="donut-svg"></svg>
+                    </div>
+                    <div class="donut-legend" id="donut-legend"></div>
+                  </div>
+                </div>
+                <div class="chart-section">
+                  <h4>Churn Probability</h4>
+                  <div class="gauge-wrap">
+                    <div class="gauge-canvas">
+                      <svg viewBox="0 0 110 60" width="110" height="60" id="gauge-svg"></svg>
+                    </div>
+                    <div class="gauge-value" id="gauge-value">—</div>
+                  </div>
+                </div>
+              </div>
+              <div class="warnings-section">
+                <div class="warnings-title">⚠ Threshold Warnings</div>
+                <div id="warnings-list"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const campaigns = [
+  { name: "Budget Conscious Streamers Retention", id: 313, code: "", type: "Offer", status: "Active" },
+  { name: "High-Value Gamers Content Plus Value Pack Campaign", id: 312, code: "", type: "Offer", status: "Active" },
+  { name: "Budget Conscious Streamers Retention Campaign", id: 307, code: "", type: "Offer", status: "Active" },
+  { name: "High-Value Gamers Content Plus Value Pack", id: 306, code: "", type: "Offer", status: "Active" },
+  { name: "catalog agent notif", id: 305, code: "", type: "Info", status: "Expired" },
+  { name: "High-Value Gamers Black Friday Content Plus", id: 303, code: "", type: "Offer", status: "Expired" },
+  { name: "ECM TEST CMPG", id: 5, code: "", type: "Offer", status: "Active" },
+  { name: "Pre-Arrival Assist Email", id: 4, code: "", type: "Offer", status: "Expired" },
+];
+
+const segments = {
+  1: { name: "Budget-Conscious Streamers", desc: "30-45, value-seekers, high video/data usage", groupShare: 19, avgContract: 5, expectedPurchase: 56, avgTenure: 18, clv: { Bronze: 35, Silver: 45, Platinum: 20 }, churn: 72, risk: "HIGH" },
+  2: { name: "High-Value Gamers", desc: "18-30, tech enthusiasts, gaming & streaming", groupShare: 28, avgContract: 12, expectedPurchase: 145, avgTenure: 36, clv: { Bronze: 15, Silver: 40, Platinum: 45 }, churn: 23, risk: "LOW" },
+  3: { name: "Family Bundle Subscribers", desc: "35-55, family plans, high data usage", groupShare: 34, avgContract: 8, expectedPurchase: 89, avgTenure: 24, clv: { Bronze: 20, Silver: 50, Platinum: 30 }, churn: 45, risk: "MEDIUM" },
+  4: { name: "Business Premium", desc: "Corp clients, enterprise solutions", groupShare: 12, avgContract: 24, expectedPurchase: 320, avgTenure: 48, clv: { Bronze: 10, Silver: 30, Platinum: 60 }, churn: 15, risk: "LOW" },
+};
+
+const thresholds = {
+  churn: { warning: 50, critical: 65 },
+  bronze: { warning: 30, critical: 40 },
+  avgContract: { warning: 6, critical: 3 },
+  expectedPurchase: { warning: 80, critical: 50 },
+};
+
+function renderCampaigns() {
+  const tbody = document.getElementById('campaign-tbody');
+  tbody.innerHTML = campaigns.map(c => `
+    <tr>
+      <td><button class="expand-btn">›</button></td>
+      <td><a class="campaign-link" href="#">${c.name}</a></td>
+      <td>${c.id}</td>
+      <td>${c.code}</td>
+      <td>${c.type}</td>
+      <td><span class="status-badge ${c.status === 'Active' ? 'status-active' : 'status-expired'}">${c.status}</span></td>
+      <td>
+        <div class="action-btns">
+          <button class="action-btn green" title="Analytics">📊</button>
+          <button class="action-btn green" title="Add">+</button>
+          <button class="action-btn orange" title="Pause">⏸</button>
+          <button class="action-btn green" title="Reset">↺</button>
+          <button class="action-btn red" title="Delete">🗑</button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function goTo(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  const bc = document.getElementById('breadcrumb');
+  if (page === 'list') {
+    bc.innerHTML = '<a href="#" onclick="goTo(\'list\')">DASHBOARD</a> › <a href="#" onclick="goTo(\'list\')">SEARCH CAMPAIGN</a>';
+  } else {
+    bc.innerHTML = '<a href="#" onclick="goTo(\'list\')">DASHBOARD</a> › <a href="#" onclick="goTo(\'list\')">CAMPAIGN</a> › CREATE';
+  }
+}
+
+function onSegmentChange(val) {
+  if (!val) {
+    document.getElementById('agent-empty').classList.remove('hidden');
+    document.getElementById('agent-analyzing').classList.add('hidden');
+    document.getElementById('agent-result').classList.add('hidden');
+    const h = document.getElementById('agent-header');
+    h.style.background = '#1A237E';
+    document.getElementById('agent-subtitle').textContent = 'Select a segment to start analysis';
+    const rb = h.querySelector('.risk-badge');
+    if (rb) rb.remove();
+    return;
+  }
+  document.getElementById('agent-empty').classList.add('hidden');
+  document.getElementById('agent-result').classList.add('hidden');
+  document.getElementById('agent-analyzing').classList.remove('hidden');
+
+  setTimeout(() => {
+    document.getElementById('agent-analyzing').classList.add('hidden');
+    renderAgentResult(segments[val]);
+  }, 900);
+}
+
+function renderAgentResult(s) {
+  // Header
+  const h = document.getElementById('agent-header');
+  const riskColor = s.risk === 'HIGH' ? '#E53935' : s.risk === 'MEDIUM' ? '#FF6B00' : '#43A047';
+  h.style.background = s.risk === 'HIGH' ? '#B71C1C' : s.risk === 'MEDIUM' ? '#E65100' : '#1B5E20';
+  document.getElementById('agent-subtitle').textContent = s.desc;
+  let rb = h.querySelector('.risk-badge');
+  if (!rb) { rb = document.createElement('div'); rb.className = 'risk-badge'; h.appendChild(rb); }
+  rb.textContent = s.risk + ' RISK';
+  rb.style.background = riskColor;
+
+  // Metrics
+  document.getElementById('m-share').textContent = s.groupShare + '%';
+  document.getElementById('m-contract').textContent = s.avgContract + ' months';
+  document.getElementById('m-purchase').textContent = '$' + s.expectedPurchase;
+  document.getElementById('m-tenure').textContent = s.avgTenure + ' MONTHS';
+
+  // Donut chart
+  renderDonut(s.clv);
+
+  // Gauge
+  renderGauge(s.churn);
+
+  // Warnings
+  renderWarnings(s);
+
+  document.getElementById('agent-result').classList.remove('hidden');
+}
+
+function renderDonut(clv) {
+  const colors = { Bronze: '#FF8C00', Silver: '#9E9E9E', Platinum: '#BDBDBD' };
+  const svg = document.getElementById('donut-svg');
+  const cx = 40, cy = 40, r = 28, innerR = 18;
+  let total = Object.values(clv).reduce((a, b) => a + b, 0);
+  let startAngle = -Math.PI / 2;
+  let paths = '';
+  Object.entries(clv).forEach(([label, val]) => {
+    const angle = (val / total) * 2 * Math.PI;
+    const endAngle = startAngle + angle;
+    const x1 = cx + r * Math.cos(startAngle), y1 = cy + r * Math.sin(startAngle);
+    const x2 = cx + r * Math.cos(endAngle), y2 = cy + r * Math.sin(endAngle);
+    const ix1 = cx + innerR * Math.cos(endAngle), iy1 = cy + innerR * Math.sin(endAngle);
+    const ix2 = cx + innerR * Math.cos(startAngle), iy2 = cy + innerR * Math.sin(startAngle);
+    const large = angle > Math.PI ? 1 : 0;
+    paths += `<path d="M${x1},${y1} A${r},${r} 0 ${large},1 ${x2},${y2} L${ix1},${iy1} A${innerR},${innerR} 0 ${large},0 ${ix2},${iy2} Z" fill="${colors[label]}" />`;
+    startAngle = endAngle;
+  });
+  svg.innerHTML = paths;
+
+  const legend = document.getElementById('donut-legend');
+  legend.innerHTML = Object.entries(clv).map(([label, val]) =>
+    `<div class="legend-item"><div class="legend-dot" style="background:${colors[label]}"></div>${label}: ${val}%</div>`
+  ).join('');
+}
+
+function renderGauge(pct) {
+  const svg = document.getElementById('gauge-svg');
+  const cx = 55, cy = 55, r = 45;
+  const startA = Math.PI, endA = 2 * Math.PI;
+  const fillEnd = startA + (pct / 100) * Math.PI;
+  const color = pct >= 65 ? '#E53935' : pct >= 50 ? '#FF6B00' : '#43A047';
+
+  function arc(start, end, color, width) {
+    const x1 = cx + r * Math.cos(start), y1 = cy + r * Math.sin(start);
+    const x2 = cx + r * Math.cos(end), y2 = cy + r * Math.sin(end);
+    const large = (end - start) > Math.PI ? 1 : 0;
+    return `<path d="M${x1},${y1} A${r},${r} 0 ${large},1 ${x2},${y2}" fill="none" stroke="${color}" stroke-width="${width}" stroke-linecap="round"/>`;
+  }
+
+  svg.innerHTML = arc(Math.PI, 2 * Math.PI, '#f0f0f0', 8) + arc(Math.PI, fillEnd, color, 8);
+  document.getElementById('gauge-value').textContent = pct + '%';
+  document.getElementById('gauge-value').style.color = color;
+}
+
+function renderWarnings(s) {
+  const list = [];
+
+  // Churn
+  if (s.churn >= thresholds.churn.critical) {
+    list.push({ type: 'critical', icon: '🔴', text: `<span class="warning-bold">Churn Probability ${s.churn}%</span> exceeds critical threshold (${thresholds.churn.critical}%) — High risk of customer loss` });
+  } else if (s.churn >= thresholds.churn.warning) {
+    list.push({ type: 'warning', icon: '🟡', text: `<span class="warning-bold">Churn Probability ${s.churn}%</span> exceeds warning threshold (${thresholds.churn.warning}%)` });
+  } else {
+    list.push({ type: 'ok', icon: '🟢', text: `Churn Probability ${s.churn}% is within acceptable range` });
+  }
+
+  // Bronze CLV
+  if (s.clv.Bronze >= thresholds.bronze.critical) {
+    list.push({ type: 'critical', icon: '🔴', text: `<span class="warning-bold">Bronze CLV ${s.clv.Bronze}%</span> exceeds critical limit (${thresholds.bronze.critical}%) — Low-value segment dominance` });
+  } else if (s.clv.Bronze >= thresholds.bronze.warning) {
+    list.push({ type: 'warning', icon: '🟡', text: `<span class="warning-bold">Bronze CLV ${s.clv.Bronze}%</span> above warning limit (${thresholds.bronze.warning}%)` });
+  } else {
+    list.push({ type: 'ok', icon: '🟢', text: `Bronze CLV ${s.clv.Bronze}% within normal range` });
+  }
+
+  // Avg Contract
+  if (s.avgContract <= thresholds.avgContract.critical) {
+    list.push({ type: 'critical', icon: '🔴', text: `<span class="warning-bold">Avg Contract ${s.avgContract} months</span> critically low — very short retention window` });
+  } else if (s.avgContract <= thresholds.avgContract.warning) {
+    list.push({ type: 'warning', icon: '🟡', text: `<span class="warning-bold">Avg Contract ${s.avgContract} months</span> below recommended minimum (${thresholds.avgContract.warning} months)` });
+  } else {
+    list.push({ type: 'ok', icon: '🟢', text: `Avg Contract ${s.avgContract} months is healthy` });
+  }
+
+  // Expected Purchase
+  if (s.expectedPurchase <= thresholds.expectedPurchase.critical) {
+    list.push({ type: 'critical', icon: '🔴', text: `<span class="warning-bold">Expected Purchase $${s.expectedPurchase}</span> is critically low (threshold: $${thresholds.expectedPurchase.critical})` });
+  } else if (s.expectedPurchase <= thresholds.expectedPurchase.warning) {
+    list.push({ type: 'warning', icon: '🟡', text: `<span class="warning-bold">Expected Purchase $${s.expectedPurchase}</span> below recommended level ($${thresholds.expectedPurchase.warning})` });
+  } else {
+    list.push({ type: 'ok', icon: '🟢', text: `Expected Purchase $${s.expectedPurchase} is above average` });
+  }
+
+  const container = document.getElementById('warnings-list');
+  container.innerHTML = list.map(w => `
+    <div class="warning-item warning-${w.type}">
+      <span class="warning-icon">${w.icon}</span>
+      <span class="warning-text">${w.text}</span>
+    </div>
+  `).join('');
+}
+
+// Init
+renderCampaigns();
+</script>
 </body>
 </html>
